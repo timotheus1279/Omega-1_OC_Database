@@ -1,0 +1,7043 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SCIPNET // SITE-416</title>
+
+<style>
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #050505;
+    color: #ffffff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+
+/* =========================================================
+   BOOT SCREEN
+   ========================================================= */
+
+#boot-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #050505;
+    z-index: 9999;
+    transition:
+        opacity 1.2s ease,
+        visibility 1.2s ease;
+}
+
+#boot-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.boot-container {
+    width: 560px;
+    max-width: 90%;
+    font-family: "Courier New", monospace;
+}
+
+.boot-title {
+    font-size: 44px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    margin-bottom: 8px;
+}
+
+.boot-subtitle {
+    color: rgba(255,255,255,0.45);
+    font-size: 12px;
+    letter-spacing: 3px;
+    margin-bottom: 35px;
+}
+
+#boot-log {
+    min-height: 180px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.65);
+}
+
+.boot-line {
+    animation:
+        bootLine
+        0.25s
+        ease
+        forwards;
+}
+
+@keyframes bootLine {
+
+    from {
+        opacity: 0;
+        transform: translateX(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+}
+
+.progress-container {
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    margin-top: 20px;
+    overflow: hidden;
+}
+
+#progress-bar {
+    width: 0%;
+    height: 100%;
+    background: white;
+    transition: width 0.5s ease;
+}
+
+#boot-status {
+    margin-top: 14px;
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.45);
+}
+
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+#scipnet {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transform: scale(1.015);
+    visibility: hidden;
+    transition:
+        opacity 1.3s ease,
+        transform 1.5s cubic-bezier(.2,.8,.2,1),
+        visibility 0s linear 1.3s;
+}
+
+#scipnet.visible {
+    opacity: 1;
+    transform: scale(1);
+    visibility: visible;
+    transition:
+        opacity 1.3s ease,
+        transform 1.5s cubic-bezier(.2,.8,.2,1),
+        visibility 0s;
+}
+
+
+/* =========================================================
+   ACCESS SCREEN
+   ========================================================= */
+
+#access-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(255,255,255,0.025),
+            rgba(0,0,0,0.98) 65%
+        );
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity .7s ease,
+        visibility .7s ease;
+}
+
+#access-screen.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.access-box {
+    width: 510px;
+    max-width: calc(100% - 40px);
+
+    padding: 30px;
+
+    border:
+        1px solid rgba(255,255,255,0.15);
+
+    background:
+        rgba(8,8,8,0.92);
+
+    backdrop-filter:
+        blur(22px);
+
+    box-shadow:
+        0 30px 100px rgba(0,0,0,0.75);
+
+    transform:
+        translateY(12px)
+        scale(.98);
+
+    opacity: 0;
+
+    transition:
+        transform .7s cubic-bezier(.2,.8,.2,1),
+        opacity .7s ease;
+}
+
+#access-screen.visible .access-box {
+    transform:
+        translateY(0)
+        scale(1);
+
+    opacity: 1;
+}
+
+.access-label {
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.32);
+    margin-bottom: 10px;
+}
+
+.access-title {
+    font-size: 22px;
+    letter-spacing: 2px;
+    font-weight: 500;
+    margin-bottom: 17px;
+}
+
+.access-text {
+    color: rgba(255,255,255,0.48);
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 25px;
+}
+
+.access-warning {
+    padding: 10px 12px;
+    border-left: 2px solid rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.025);
+    color: rgba(255,255,255,0.38);
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    line-height: 1.6;
+    letter-spacing: .6px;
+    margin-bottom: 24px;
+}
+
+.access-actions {
+    display: flex;
+    gap: 9px;
+}
+
+.access-button {
+    flex: 1;
+    height: 43px;
+
+    border:
+        1px solid rgba(255,255,255,0.14);
+
+    background:
+        rgba(255,255,255,0.035);
+
+    color:
+        rgba(255,255,255,0.70);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        10px;
+
+    letter-spacing:
+        1px;
+
+    cursor:
+        pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+}
+
+.access-button:hover {
+    background:
+        rgba(255,255,255,0.08);
+
+    border-color:
+        rgba(255,255,255,0.25);
+
+    transform:
+        translateY(-1px);
+
+    color:
+        white;
+}
+
+.access-button.primary {
+    background:
+        rgba(255,255,255,0.09);
+
+    border-color:
+        rgba(255,255,255,0.23);
+
+    color:
+        white;
+}
+
+.access-button.exit {
+    color:
+        rgba(255,255,255,0.42);
+}
+
+
+/* =========================================================
+   TERMINATED SCREEN
+   ========================================================= */
+
+#terminated-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #030303;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity .7s ease,
+        visibility .7s ease;
+}
+
+#terminated-screen.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.terminated-content {
+    text-align: center;
+    font-family: "Courier New", monospace;
+}
+
+.terminated-symbol {
+    font-size: 42px;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 18px;
+}
+
+.terminated-title {
+    font-size: 17px;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.78);
+    margin-bottom: 10px;
+}
+
+.terminated-subtitle {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.27);
+}
+
+
+/* =========================================================
+   EXIT CONFIRMATION
+   ========================================================= */
+
+#exit-confirm {
+    position: fixed;
+    inset: 0;
+    z-index: 9500;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0,0,0,0.70);
+    backdrop-filter: blur(8px);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity .3s ease,
+        visibility .3s ease;
+}
+
+#exit-confirm.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.exit-box {
+    width: 390px;
+    max-width: calc(100% - 40px);
+
+    padding: 25px;
+
+    border:
+        1px solid rgba(255,255,255,0.15);
+
+    background:
+        rgba(8,8,8,0.96);
+
+    box-shadow:
+        0 30px 90px rgba(0,0,0,.7);
+
+    transform:
+        scale(.96);
+
+    transition:
+        transform .3s ease;
+}
+
+#exit-confirm.visible .exit-box {
+    transform:
+        scale(1);
+}
+
+.exit-label {
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,.30);
+    margin-bottom: 9px;
+}
+
+.exit-title {
+    font-size: 18px;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+}
+
+.exit-text {
+    color: rgba(255,255,255,.43);
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 22px;
+}
+
+.exit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.exit-action {
+    flex: 1;
+    height: 39px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.035);
+    color: rgba(255,255,255,.65);
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.exit-action:hover {
+    background: rgba(255,255,255,.08);
+    color: white;
+}
+
+.exit-action.confirm {
+    color: rgba(255,255,255,.85);
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+header {
+    position: relative;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    background: rgba(255,255,255,0.025);
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    z-index: 50;
+    backdrop-filter: blur(14px);
+}
+
+.system-name {
+    font-size: 19px;
+    letter-spacing: 3px;
+    font-weight: 500;
+}
+
+.site-number {
+    margin-left: 35px;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    color: rgba(255,255,255,0.42);
+    letter-spacing: 2px;
+}
+
+.status {
+    margin-left: auto;
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.55);
+}
+
+.header-exit {
+    margin-left: 20px;
+
+    height: 30px;
+    padding: 0 11px;
+
+    border:
+        1px solid rgba(255,255,255,0.11);
+
+    background:
+        rgba(255,255,255,0.025);
+
+    color:
+        rgba(255,255,255,0.38);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        8px;
+
+    letter-spacing:
+        1.2px;
+
+    cursor:
+        pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease;
+}
+
+.header-exit:hover {
+    background:
+        rgba(255,255,255,0.07);
+
+    border-color:
+        rgba(255,255,255,0.22);
+
+    color:
+        white;
+}
+
+
+/* =========================================================
+   MAIN AREA
+   ========================================================= */
+
+main {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 68px);
+    overflow: hidden;
+    background: #050505;
+}
+
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.grid {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+
+    background-image:
+
+        linear-gradient(
+            rgba(255,255,255,0.035) 1px,
+            transparent 1px
+        ),
+
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,0.035) 1px,
+            transparent 1px
+        ),
+
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.20) 1px,
+            transparent 1.3px
+        );
+
+    background-size:
+        70px 70px,
+        70px 70px,
+        70px 70px;
+
+    pointer-events: none;
+    opacity: 0.75;
+}
+
+
+/* =========================================================
+   SCP BACKGROUND LOGO
+   ========================================================= */
+
+.logo-background {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 720px;
+    height: 720px;
+
+    transform:
+        translate(-50%, -50%);
+
+    object-fit: contain;
+    z-index: 2;
+
+    opacity: 0.045;
+
+    filter:
+        grayscale(1)
+        brightness(1.8)
+        blur(4px);
+
+    pointer-events: none;
+    user-select: none;
+
+    animation:
+        logoFloat
+        14s
+        ease-in-out
+        infinite
+        alternate;
+}
+
+@keyframes logoFloat {
+
+    from {
+        transform:
+            translate(-50%, -50%)
+            scale(0.98);
+    }
+
+    to {
+        transform:
+            translate(-50%, -50%)
+            scale(1.03);
+    }
+
+}
+
+
+/* =========================================================
+   VIGNETTE
+   ========================================================= */
+
+.vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            transparent 20%,
+            rgba(0,0,0,0.25) 60%,
+            rgba(0,0,0,0.75) 100%
+        );
+}
+
+
+/* =========================================================
+   DATABASE WORKSPACE
+   ========================================================= */
+
+.database-workspace {
+    position: absolute;
+
+    left: 30px;
+    right: 30px;
+
+    top: 25px;
+    bottom: 42px;
+
+    z-index: 20;
+
+    display: grid;
+
+    grid-template-columns:
+        245px
+        minmax(0, 1fr)
+        245px;
+
+    gap: 14px;
+
+    min-height: 0;
+}
+
+
+/* =========================================================
+   GENERIC PANEL
+   ========================================================= */
+
+.database-panel {
+    background: rgba(6,6,6,0.78);
+
+    border:
+        1px solid rgba(255,255,255,0.13);
+
+    backdrop-filter:
+        blur(18px);
+
+    box-shadow:
+        0 25px 80px rgba(0,0,0,0.45);
+
+    min-height: 0;
+}
+
+
+/* =========================================================
+   LEFT DOSSIER STORAGE
+   ========================================================= */
+
+.dossier-storage {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.025),
+            rgba(255,255,255,0.008)
+        );
+
+    position: relative;
+}
+
+.dossier-storage::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    width: 1px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            transparent,
+            rgba(255,255,255,0.10),
+            transparent
+        );
+
+    pointer-events: none;
+}
+
+.storage-header {
+    padding: 18px 17px 16px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.10);
+
+    background:
+        rgba(255,255,255,0.018);
+}
+
+.storage-label {
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.32);
+    margin-bottom: 8px;
+}
+
+.storage-title {
+    font-size: 18px;
+    letter-spacing: 1.5px;
+    font-weight: 500;
+    position: relative;
+    padding-left: 11px;
+}
+
+.storage-title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 3px;
+    bottom: 3px;
+    width: 2px;
+    background: rgba(255,255,255,0.75);
+    box-shadow: 0 0 8px rgba(255,255,255,0.20);
+}
+
+.new-dossier-button {
+    width: 100%;
+    height: 40px;
+    margin-top: 16px;
+
+    border: 1px solid rgba(255,255,255,0.14);
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,0.055),
+            rgba(255,255,255,0.025)
+        );
+
+    color: rgba(255,255,255,0.78);
+
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    cursor: pointer;
+
+    transition:
+        background .22s ease,
+        border-color .22s ease,
+        transform .22s ease,
+        box-shadow .22s ease;
+
+    position: relative;
+    overflow: hidden;
+}
+
+.new-dossier-button::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.75);
+    transform: scaleY(0);
+    transition: transform .22s ease;
+}
+
+.new-dossier-button:hover {
+    background: rgba(255,255,255,0.075);
+    border-color: rgba(255,255,255,0.28);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.20);
+}
+
+.new-dossier-button:hover::before {
+    transform: scaleY(1);
+}
+
+.storage-search {
+    padding: 12px 12px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    position: relative;
+}
+
+.storage-search::before {
+    content: "⌕";
+    position: absolute;
+    left: 22px;
+    top: 21px;
+    color: rgba(255,255,255,0.25);
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.storage-search input {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px 0 31px;
+
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.08);
+    outline: none;
+
+    color: white;
+
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    letter-spacing: .5px;
+
+    transition:
+        border-color .2s ease,
+        background .2s ease,
+        box-shadow .2s ease;
+}
+
+.storage-search input:focus {
+    border-color: rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.045);
+    box-shadow: 0 0 18px rgba(255,255,255,0.035);
+}
+
+.storage-search input::placeholder {
+    color: rgba(255,255,255,0.22);
+}
+
+.dossier-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 9px 8px 8px;
+}
+
+.dossier-list::-webkit-scrollbar {
+    width: 3px;
+}
+
+.dossier-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dossier-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.17);
+}
+
+.dossier-card {
+    position: relative;
+    padding: 13px 12px 12px 14px;
+    margin-bottom: 7px;
+
+    border: 1px solid rgba(255,255,255,0.055);
+    background: rgba(255,255,255,0.018);
+
+    cursor: pointer;
+    overflow: hidden;
+
+    transition:
+        background .20s ease,
+        border-color .20s ease,
+        transform .20s ease,
+        box-shadow .20s ease;
+}
+
+.dossier-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+
+    background:
+        var(--status-color, rgba(255,255,255,0.5));
+
+    box-shadow:
+        0 0 10px var(--status-color, transparent);
+
+    opacity: .45;
+
+    transition:
+        opacity .20s ease,
+        width .20s ease;
+}
+
+.dossier-card::after {
+    content: "";
+    position: absolute;
+    right: -25px;
+    top: -25px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+
+    background: var(--status-color, transparent);
+    opacity: .025;
+    filter: blur(16px);
+
+    pointer-events: none;
+}
+
+.dossier-card:hover {
+    background: rgba(255,255,255,0.045);
+    border-color: rgba(255,255,255,0.13);
+    transform: translateX(2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.20);
+}
+
+.dossier-card:hover::before {
+    opacity: .9;
+    width: 3px;
+}
+
+.dossier-card.selected {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,0.075),
+            rgba(255,255,255,0.035)
+        );
+
+    border-color: rgba(255,255,255,0.20);
+
+    box-shadow:
+        inset 0 0 25px rgba(255,255,255,0.018),
+        0 8px 25px rgba(0,0,0,0.18);
+}
+
+.dossier-card.selected::before {
+    opacity: 1;
+    width: 3px;
+}
+
+.card-id {
+    font-family: "Courier New", monospace;
+    font-size: 8px;
+    color: rgba(255,255,255,0.27);
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+}
+
+.card-name {
+    font-size: 13px;
+    letter-spacing: .6px;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-status {
+    font-family: "Courier New", monospace;
+    font-size: 8px;
+    letter-spacing: 1.2px;
+    transition: color .25s ease, text-shadow .25s ease;
+}
+
+.card-ownership {
+    margin-top: 7px;
+    padding-top: 6px;
+
+    border-top:
+        1px solid rgba(255,255,255,0.045);
+
+    font-family: "Courier New", monospace;
+    font-size: 7px;
+    letter-spacing: .8px;
+    color: rgba(255,255,255,0.22);
+}
+
+
+/* =========================================================
+   STORAGE STATUS GLOW
+   ========================================================= */
+
+.dossier-card.status-active {
+    --status-color: #79ff9a;
+}
+
+.dossier-card.status-retired {
+    --status-color: #aaaaaa;
+}
+
+.dossier-card.status-inactive {
+    --status-color: #72aaff;
+}
+
+.dossier-card.status-suspended {
+    --status-color: #ffe078;
+}
+
+.dossier-card.status-mia {
+    --status-color: #ffad68;
+}
+
+.dossier-card.status-kia {
+    --status-color: #ff6464;
+}
+
+.dossier-card.status-transferred {
+    --status-color: #bf8cff;
+}
+
+.dossier-card.status-unknown {
+    --status-color: #888888;
+}
+
+.dossier-card .card-status {
+    color: var(--status-color);
+    text-shadow: 0 0 8px var(--status-color);
+}
+
+
+/* =========================================================
+   CENTER DOSSIER
+   ========================================================= */
+
+.personnel-dossier {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+
+    background: rgba(7,7,7,0.80);
+
+    border: 1px solid rgba(255,255,255,0.14);
+
+    backdrop-filter: blur(20px);
+
+    box-shadow: 0 30px 100px rgba(0,0,0,0.55);
+
+    animation:
+        dossierAppear
+        .9s
+        cubic-bezier(.2,.8,.2,1)
+        both;
+}
+
+@keyframes dossierAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+}
+
+.dossier-header {
+    min-height: 78px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 24px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.10);
+
+    background:
+        rgba(255,255,255,0.025);
+}
+
+.dossier-label {
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 7px;
+}
+
+.dossier-title {
+    font-size: 20px;
+    letter-spacing: 3px;
+    font-weight: 500;
+}
+
+.dossier-id {
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.42);
+}
+
+.editor-state {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    margin-left: 20px;
+
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.35);
+}
+
+.editor-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+}
+
+.editor-state.unlocked {
+    color: rgba(255,255,255,0.75);
+}
+
+.editor-state.unlocked .editor-dot {
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(255,255,255,0.4);
+}
+
+
+/* =========================================================
+   DOSSIER CONTENT
+   ========================================================= */
+
+.dossier-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 22px 24px 28px;
+}
+
+.dossier-content::-webkit-scrollbar {
+    width: 5px;
+}
+
+.dossier-content::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.02);
+}
+
+.dossier-content::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.18);
+}
+
+
+/* =========================================================
+   FIELD GRID
+   ========================================================= */
+
+.biodata-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 17px 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field label {
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.40);
+}
+
+.field input,
+.field select {
+    width: 100%;
+    height: 40px;
+    padding: 0 11px;
+
+    background: rgba(255,255,255,0.025);
+
+    border:
+        1px solid rgba(255,255,255,0.09);
+
+    outline: none;
+
+    color: white;
+
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+
+    transition:
+        border-color .2s ease,
+        background .2s ease;
+}
+
+.field input::placeholder {
+    color: rgba(255,255,255,0.20);
+}
+
+.field input:focus,
+.field select:focus {
+    border-color: rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.045);
+}
+
+.field select {
+    appearance: none;
+    cursor: pointer;
+}
+
+.field select option {
+    background: #111111;
+    color: white;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status-select.status-active {
+    color: #8cffaa;
+    border-color: rgba(100,255,140,0.25);
+    background: rgba(60,180,90,0.06);
+    box-shadow: 0 0 12px rgba(80,255,120,0.05);
+}
+
+.status-select.status-retired {
+    color: #aaaaaa;
+    border-color: rgba(180,180,180,0.22);
+}
+
+.status-select.status-inactive {
+    color: #82b9ff;
+    border-color: rgba(100,160,255,0.25);
+    box-shadow: 0 0 12px rgba(100,160,255,0.05);
+}
+
+.status-select.status-suspended {
+    color: #ffe082;
+    border-color: rgba(255,210,80,0.25);
+    box-shadow: 0 0 12px rgba(255,210,80,0.05);
+}
+
+.status-select.status-mia {
+    color: #ffb16b;
+    border-color: rgba(255,150,70,0.25);
+    box-shadow: 0 0 12px rgba(255,150,70,0.05);
+}
+
+.status-select.status-kia {
+    color: #ff6e6e;
+    border-color: rgba(255,70,70,0.28);
+    box-shadow: 0 0 12px rgba(255,70,70,0.06);
+}
+
+.status-select.status-transferred {
+    color: #c79cff;
+    border-color: rgba(170,110,255,0.25);
+    box-shadow: 0 0 12px rgba(170,110,255,0.05);
+}
+
+.status-select.status-unknown {
+    color: #888888;
+    border-color: rgba(130,130,130,0.18);
+}
+
+
+/* =========================================================
+   SPECIALITIES
+   ========================================================= */
+
+.speciality-field {
+    grid-column: 1 / -1;
+}
+
+.speciality-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.speciality-button {
+    width: 100%;
+    height: 40px;
+    padding: 0 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: rgba(255,255,255,0.025);
+
+    border:
+        1px solid rgba(255,255,255,0.09);
+
+    color: rgba(255,255,255,0.60);
+
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease;
+}
+
+.speciality-button:hover {
+    background: rgba(255,255,255,0.045);
+    border-color: rgba(255,255,255,0.18);
+}
+
+.speciality-arrow {
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    transition: transform .2s ease;
+}
+
+.speciality-dropdown.open .speciality-arrow {
+    transform: rotate(180deg);
+}
+
+.speciality-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 5px);
+
+    background: rgba(10,10,10,0.99);
+
+    border:
+        1px solid rgba(255,255,255,0.12);
+
+    padding: 5px;
+
+    z-index: 100;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(-5px);
+
+    transition:
+        opacity .18s ease,
+        transform .18s ease,
+        visibility .18s ease;
+}
+
+.speciality-menu.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.speciality-option {
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding: 0 10px;
+
+    cursor: pointer;
+
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+    font-weight: 500;
+
+    color: rgba(255,255,255,0.65);
+
+    transition:
+        background .15s ease,
+        color .15s ease,
+        padding-left .15s ease;
+}
+
+.speciality-option:hover {
+    background: rgba(255,255,255,0.06);
+    color: white;
+    padding-left: 13px;
+}
+
+.speciality-option input {
+    appearance: none;
+
+    width: 13px;
+    height: 13px;
+
+    flex-shrink: 0;
+
+    border:
+        1px solid rgba(255,255,255,0.25);
+
+    background: transparent;
+
+    cursor: pointer;
+    position: relative;
+}
+
+.speciality-option input:checked {
+    background: rgba(255,255,255,0.85);
+    border-color: white;
+}
+
+.speciality-option input:checked::after {
+    content: "";
+
+    position: absolute;
+
+    width: 5px;
+    height: 5px;
+
+    background: #111;
+
+    left: 3px;
+    top: 3px;
+}
+
+.speciality-limit {
+    padding: 8px 10px;
+
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+
+    color: rgba(255,255,255,0.30);
+
+    border-top:
+        1px solid rgba(255,255,255,0.06);
+
+    margin-top: 4px;
+}
+
+.selected-specialities {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.speciality-tag {
+    padding: 5px 8px;
+
+    border:
+        1px solid rgba(255,255,255,0.13);
+
+    background:
+        rgba(255,255,255,0.04);
+
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    letter-spacing: .7px;
+
+    color: rgba(255,255,255,0.70);
+}
+
+
+/* =========================================================
+   HISTORY / NOTES
+   ========================================================= */
+
+.records-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+
+    margin-top: 22px;
+    padding-top: 20px;
+
+    border-top:
+        1px solid rgba(255,255,255,0.08);
+
+    align-items: stretch;
+}
+
+.record-box {
+    border:
+        1px solid rgba(255,255,255,0.10);
+
+    background:
+        rgba(255,255,255,0.018);
+
+    min-height: 300px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    overflow: hidden;
+}
+
+.record-header {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        13px 15px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.08);
+
+    flex-shrink: 0;
+}
+
+.record-title {
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        11px;
+
+    letter-spacing:
+        2px;
+
+    color:
+        rgba(255,255,255,0.55);
+}
+
+.record-add {
+    border:
+        none;
+
+    background:
+        transparent;
+
+    color:
+        rgba(255,255,255,0.45);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        10px;
+
+    cursor:
+        pointer;
+}
+
+.record-add:hover {
+    color: white;
+}
+
+.record-content {
+    flex: 1;
+    min-height: 0;
+
+    padding: 15px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.record-heading {
+    width: 100%;
+    height: 36px;
+
+    margin-bottom: 10px;
+    padding: 0 9px;
+
+    background:
+        rgba(255,255,255,0.025);
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    outline: none;
+
+    color: white;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    flex-shrink: 0;
+}
+
+.record-heading::placeholder {
+    color:
+        rgba(255,255,255,0.20);
+}
+
+
+/* =========================================================
+   NOTES — FULL HEIGHT TEXTBOX
+   ========================================================= */
+
+.record-text {
+    width: 100%;
+
+    flex: 1;
+
+    min-height: 0;
+
+    resize: auto;
+
+    padding: 10px;
+
+    background:
+        rgba(255,255,255,0.018);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    outline: none;
+
+    color:
+        rgba(255,255,255,0.78);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 13px;
+
+    line-height: 1.65;
+}
+
+.record-text:focus,
+.record-heading:focus {
+    border-color:
+        rgba(255,255,255,0.20);
+
+    background:
+        rgba(255,255,255,0.035);
+}
+
+
+/* =========================================================
+   HISTORY RICH TEXT EDITOR
+   ========================================================= */
+
+.history-editor-content {
+    padding: 13px 15px 15px;
+}
+
+.history-toolbar {
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    gap: 3px;
+
+    margin-bottom: 8px;
+    padding: 3px;
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    background:
+        rgba(255,255,255,0.018);
+
+    overflow: hidden;
+
+    flex-shrink: 0;
+}
+
+.history-toolbar button {
+    height: 28px;
+    min-width: 29px;
+    padding: 0 7px;
+
+    border:
+        1px solid transparent;
+
+    background:
+        transparent;
+
+    color:
+        rgba(255,255,255,0.48);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 9px;
+
+    cursor: pointer;
+
+    transition:
+        background .16s ease,
+        color .16s ease,
+        border-color .16s ease;
+}
+
+.history-toolbar button:hover {
+    background:
+        rgba(255,255,255,0.07);
+
+    border-color:
+        rgba(255,255,255,0.10);
+
+    color: white;
+}
+
+.history-toolbar select {
+    height: 28px;
+
+    padding: 0 6px;
+
+    border:
+        1px solid transparent;
+
+    outline: none;
+
+    background:
+        transparent;
+
+    color:
+        rgba(255,255,255,0.48);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 8px;
+
+    cursor: pointer;
+}
+
+.history-toolbar select:hover,
+.history-toolbar select:focus {
+    background:
+        rgba(255,255,255,0.07);
+
+    border-color:
+        rgba(255,255,255,0.10);
+
+    color: white;
+}
+
+.history-toolbar select option {
+    background: #111;
+    color: white;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 17px;
+
+    background:
+        rgba(255,255,255,0.08);
+
+    margin: 0 4px;
+}
+
+.history-editor {
+    width: 100%;
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding: 10px;
+
+    background:
+        rgba(255,255,255,0.018);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    outline: none;
+
+    color:
+        rgba(255,255,255,0.80);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 13px;
+
+    line-height: 1.65;
+
+    transition:
+        border-color .2s ease,
+        background .2s ease,
+        box-shadow .2s ease;
+}
+
+.history-editor:focus {
+    border-color:
+        rgba(255,255,255,0.20);
+
+    background:
+        rgba(255,255,255,0.035);
+
+    box-shadow:
+        inset 0 0 20px rgba(255,255,255,0.012);
+}
+
+.history-editor:empty::before {
+    content:
+        attr(data-placeholder);
+
+    color:
+        rgba(255,255,255,0.20);
+
+    pointer-events:
+        none;
+}
+
+.history-editor::-webkit-scrollbar {
+    width: 4px;
+}
+
+.history-editor::-webkit-scrollbar-track {
+    background:
+        rgba(255,255,255,0.02);
+}
+
+.history-editor::-webkit-scrollbar-thumb {
+    background:
+        rgba(255,255,255,0.16);
+}
+
+.history-editor ul,
+.history-editor ol {
+    padding-left: 24px;
+    margin: 7px 0;
+}
+
+.history-editor p {
+    margin: 0 0 7px;
+}
+
+.history-editor b,
+.history-editor strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.history-editor u {
+    text-underline-offset: 2px;
+}
+
+
+/* =========================================================
+   SKIN SECTION
+   ========================================================= */
+
+.skin-section {
+    margin-top: 22px;
+
+    padding-top: 20px;
+
+    border-top:
+        1px solid rgba(255,255,255,0.08);
+
+    display: grid;
+
+    grid-template-columns:
+        355px
+        1fr;
+
+    gap: 18px;
+
+    align-items: start;
+}
+
+
+/* TWO SKIN PREVIEWS */
+
+.skin-previews {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap: 12px;
+}
+
+.skin-card {
+    min-width: 0;
+}
+
+.skin-card-label {
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        9px;
+
+    letter-spacing:
+        1.5px;
+
+    color:
+        rgba(255,255,255,0.35);
+
+    margin-bottom:
+        7px;
+}
+
+
+/* SQUARE SKIN */
+
+.skin-preview {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+
+    border:
+        1px solid rgba(255,255,255,0.12);
+
+    background:
+        rgba(255,255,255,0.025);
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    overflow:
+        hidden;
+
+    position:
+        relative;
+
+    cursor:
+        zoom-in;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        transform .2s ease;
+}
+
+.skin-preview:hover {
+    border-color:
+        rgba(255,255,255,0.25);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.30);
+}
+
+.skin-preview::before {
+    content:
+        "NO PNG";
+
+    position:
+        absolute;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        9px;
+
+    letter-spacing:
+        1.5px;
+
+    color:
+        rgba(255,255,255,0.18);
+}
+
+.skin-preview img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    position: relative;
+
+    z-index: 2;
+
+    display: none;
+
+    user-select: none;
+}
+
+
+/* =========================================================
+   SKIN INFORMATION
+   ========================================================= */
+
+.skin-information {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        10px;
+}
+
+.skin-label {
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        10px;
+
+    letter-spacing:
+        1.5px;
+
+    color:
+        rgba(255,255,255,0.40);
+}
+
+.skin-description {
+    font-size:
+        12px;
+
+    line-height:
+        1.6;
+
+    color:
+        rgba(255,255,255,0.38);
+}
+
+.skin-button {
+    width: 160px;
+
+    height: 38px;
+
+    border:
+        1px solid rgba(255,255,255,0.15);
+
+    background:
+        rgba(255,255,255,0.04);
+
+    color:
+        rgba(255,255,255,0.75);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        10px;
+
+    letter-spacing:
+        1px;
+
+    cursor:
+        pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease;
+}
+
+.skin-button:hover {
+    background:
+        rgba(255,255,255,0.08);
+
+    border-color:
+        rgba(255,255,255,0.25);
+}
+
+#skin-input {
+    display: none;
+}
+
+
+/* =========================================================
+   SKIN ZOOM OVERLAY
+   ========================================================= */
+
+#skin-zoom-overlay {
+    position: fixed;
+    inset: 0;
+
+    z-index: 9800;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        rgba(0,0,0,0.86);
+
+    backdrop-filter:
+        blur(14px);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity .35s ease,
+        visibility .35s ease;
+}
+
+#skin-zoom-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.skin-zoom-window {
+    width: min(760px, 90vw);
+    height: min(820px, 88vh);
+
+    display: flex;
+    flex-direction: column;
+
+    border:
+        1px solid rgba(255,255,255,0.14);
+
+    background:
+        rgba(7,7,7,0.96);
+
+    box-shadow:
+        0 40px 120px rgba(0,0,0,0.80);
+
+    transform:
+        scale(.96);
+
+    transition:
+        transform .35s cubic-bezier(.2,.8,.2,1);
+}
+
+#skin-zoom-overlay.visible .skin-zoom-window {
+    transform:
+        scale(1);
+}
+
+.skin-zoom-header {
+    height: 58px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 18px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.09);
+
+    flex-shrink:
+        0;
+}
+
+.skin-zoom-label {
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        9px;
+
+    letter-spacing:
+        2px;
+
+    color:
+        rgba(255,255,255,0.35);
+
+    margin-bottom:
+        5px;
+}
+
+.skin-zoom-title {
+    font-size:
+        15px;
+
+    letter-spacing:
+        2px;
+}
+
+.skin-zoom-close {
+    width: 32px;
+    height: 32px;
+
+    border:
+        1px solid rgba(255,255,255,0.10);
+
+    background:
+        transparent;
+
+    color:
+        rgba(255,255,255,0.55);
+
+    font-size:
+        19px;
+
+    cursor:
+        pointer;
+}
+
+.skin-zoom-close:hover {
+    background:
+        rgba(255,255,255,0.07);
+
+    color:
+        white;
+}
+
+.skin-zoom-view {
+    flex: 1;
+    min-height: 0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    overflow:
+        hidden;
+
+    position:
+        relative;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.035),
+            rgba(0,0,0,0.65)
+        );
+}
+
+#skin-zoom-image {
+    max-width: 75%;
+    max-height: 75%;
+
+    object-fit: contain;
+
+    user-select: none;
+
+    transform-origin: center center;
+
+    cursor:
+        grab;
+
+    transition:
+        transform .12s ease;
+}
+
+#skin-zoom-image:active {
+    cursor:
+        grabbing;
+}
+
+.skin-zoom-controls {
+    height: 62px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        8px;
+
+    border-top:
+        1px solid rgba(255,255,255,0.09);
+
+    flex-shrink:
+        0;
+}
+
+.zoom-button {
+    width:
+        38px;
+
+    height:
+        32px;
+
+    border:
+        1px solid rgba(255,255,255,0.12);
+
+    background:
+        rgba(255,255,255,0.035);
+
+    color:
+        rgba(255,255,255,0.70);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        15px;
+
+    cursor:
+        pointer;
+}
+
+.zoom-button:hover {
+    background:
+        rgba(255,255,255,0.08);
+
+    color:
+        white;
+}
+
+.zoom-level {
+    min-width:
+        62px;
+
+    text-align:
+        center;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        9px;
+
+    letter-spacing:
+        1px;
+
+    color:
+        rgba(255,255,255,0.45);
+}
+
+
+/* =========================================================
+   ACTION BAR
+   ========================================================= */
+
+.action-bar {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    margin-top:
+        24px;
+
+    padding-top:
+        18px;
+
+    border-top:
+        1px solid rgba(255,255,255,0.08);
+}
+
+.action-left {
+    display:
+        flex;
+
+    gap:
+        8px;
+}
+
+.action-button {
+    height:
+        39px;
+
+    padding:
+        0 16px;
+
+    border:
+        1px solid rgba(255,255,255,0.12);
+
+    background:
+        rgba(255,255,255,0.035);
+
+    color:
+        rgba(255,255,255,0.70);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        10px;
+
+    letter-spacing:
+        1px;
+
+    cursor:
+        pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease;
+}
+
+.action-button:hover {
+    background:
+        rgba(255,255,255,0.08);
+
+    border-color:
+        rgba(255,255,255,0.22);
+
+    color:
+        white;
+}
+
+.save-button {
+    background:
+        rgba(255,255,255,0.09);
+
+    color:
+        white;
+
+    border-color:
+        rgba(255,255,255,0.22);
+}
+
+.save-button:hover {
+    background:
+        rgba(255,255,255,0.14);
+}
+
+.delete-button {
+    color:
+        rgba(255,120,120,0.65);
+}
+
+.save-status {
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        9px;
+
+    letter-spacing:
+        1px;
+
+    color:
+        rgba(255,255,255,0.28);
+}
+
+
+/* =========================================================
+   RIGHT INFORMATION PANEL
+   ========================================================= */
+
+.system-info {
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    overflow:
+        hidden;
+}
+
+.info-block {
+    padding:
+        17px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.08);
+}
+
+.info-title {
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        10px;
+
+    letter-spacing:
+        2px;
+
+    color:
+        rgba(255,255,255,0.38);
+
+    margin-bottom:
+        13px;
+}
+
+.info-line {
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    padding:
+        8px 0;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.05);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        10px;
+
+    letter-spacing:
+        .8px;
+
+    color:
+        rgba(255,255,255,0.52);
+}
+
+.online {
+    color:
+        rgba(255,255,255,0.82);
+}
+
+
+/* =========================================================
+   MINI SATELLITE
+   ========================================================= */
+
+.mini-satellite {
+    width:
+        100%;
+
+    height:
+        120px;
+
+    object-fit:
+        cover;
+
+    filter:
+        grayscale(1)
+        contrast(1.15)
+        brightness(.72);
+
+    opacity:
+        .78;
+
+    display:
+        block;
+}
+
+.satellite-caption {
+    padding-top:
+        9px;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        8px;
+
+    line-height:
+        1.7;
+
+    letter-spacing:
+        .7px;
+
+    color:
+        rgba(255,255,255,0.34);
+}
+
+
+/* =========================================================
+   LOCATION
+   ========================================================= */
+
+.location-value {
+    font-size:
+        22px;
+
+    letter-spacing:
+        3px;
+
+    margin-bottom:
+        7px;
+}
+
+.coordinates {
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        9px;
+
+    line-height:
+        1.8;
+
+    letter-spacing:
+        1px;
+
+    color:
+        rgba(255,255,255,0.35);
+}
+
+
+/* =========================================================
+   NETWORK GRAPH
+   ========================================================= */
+
+.network-graph {
+    height:
+        38px;
+
+    display:
+        flex;
+
+    align-items:
+        flex-end;
+
+    gap:
+        3px;
+
+    margin-top:
+        15px;
+}
+
+.network-bar {
+    flex:
+        1;
+
+    height:
+        20%;
+
+    background:
+        rgba(255,255,255,0.35);
+
+    animation:
+        networkPulse
+        1.4s
+        ease-in-out
+        infinite
+        alternate;
+}
+
+.network-bar:nth-child(2) {
+    height: 45%;
+    animation-delay: .1s;
+}
+
+.network-bar:nth-child(3) {
+    height: 30%;
+    animation-delay: .2s;
+}
+
+.network-bar:nth-child(4) {
+    height: 70%;
+    animation-delay: .3s;
+}
+
+.network-bar:nth-child(5) {
+    height: 52%;
+    animation-delay: .4s;
+}
+
+.network-bar:nth-child(6) {
+    height: 82%;
+    animation-delay: .5s;
+}
+
+.network-bar:nth-child(7) {
+    height: 45%;
+    animation-delay: .6s;
+}
+
+.network-bar:nth-child(8) {
+    height: 65%;
+    animation-delay: .7s;
+}
+
+@keyframes networkPulse {
+
+    from {
+        opacity: .25;
+    }
+
+    to {
+        opacity: .8;
+    }
+
+}
+
+
+/* =========================================================
+   SYSTEM TIME
+   ========================================================= */
+
+.system-time {
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        25px;
+
+    letter-spacing:
+        4px;
+
+    color:
+        rgba(255,255,255,0.85);
+}
+
+
+/* =========================================================
+   ADMIN / CREATOR MODE
+   ========================================================= */
+
+.permission-panel {
+    padding:
+        17px;
+
+    margin-top:
+        auto;
+}
+
+.permission-status {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        10px;
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    background:
+        rgba(255,255,255,0.02);
+}
+
+.permission-text {
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        9px;
+
+    letter-spacing:
+        1px;
+
+    color:
+        rgba(255,255,255,0.42);
+}
+
+.permission-button {
+    border:
+        1px solid rgba(255,255,255,0.13);
+
+    background:
+        rgba(255,255,255,0.035);
+
+    color:
+        rgba(255,255,255,0.65);
+
+    height:
+        30px;
+
+    padding:
+        0 10px;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        8px;
+
+    letter-spacing:
+        1px;
+
+    cursor:
+        pointer;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.system-footer {
+    position:
+        absolute;
+
+    bottom:
+        14px;
+
+    left:
+        30px;
+
+    z-index:
+        30;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        9px;
+
+    letter-spacing:
+        1.5px;
+
+    color:
+        rgba(255,255,255,0.22);
+}
+
+
+/* =========================================================
+   SCANLINE
+   ========================================================= */
+
+.scanline {
+    position:
+        absolute;
+
+    left:
+        0;
+
+    right:
+        0;
+
+    height:
+        1px;
+
+    top:
+        0;
+
+    z-index:
+        40;
+
+    background:
+        rgba(255,255,255,0.045);
+
+    pointer-events:
+        none;
+
+    animation:
+        scan
+        7s
+        linear
+        infinite;
+}
+
+@keyframes scan {
+
+    from {
+        top: 0;
+    }
+
+    to {
+        top: 100%;
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1250px) {
+
+    .database-workspace {
+        grid-template-columns:
+            220px
+            minmax(0,1fr)
+            210px;
+
+        left: 20px;
+        right: 20px;
+    }
+
+    .dossier-content {
+        padding: 18px;
+    }
+
+    .dossier-header {
+        padding: 0 18px;
+    }
+
+    .skin-section {
+        grid-template-columns: 315px 1fr;
+    }
+
+}
+
+@media (max-width: 1000px) {
+
+    .database-workspace {
+        grid-template-columns:
+            210px
+            minmax(0,1fr);
+    }
+
+    .system-info {
+        display: none;
+    }
+
+}
+
+@media (max-width: 760px) {
+
+    .database-workspace {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+    }
+
+    .dossier-storage {
+        max-height: 220px;
+    }
+
+    .biodata-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .records-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skin-section {
+        grid-template-columns: 1fr;
+    }
+
+    .skin-previews {
+        max-width: 360px;
+    }
+
+    header {
+        padding: 0 18px;
+    }
+
+    .site-number {
+        margin-left: 15px;
+    }
+
+    .status {
+        display: none;
+    }
+
+    .header-exit {
+        margin-left: auto;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     BOOT SCREEN
+     ===================================================== -->
+
+<div id="boot-screen">
+
+    <div class="boot-container">
+
+        <div class="boot-title">
+            SCIPNET
+        </div>
+
+        <div class="boot-subtitle">
+            SECURE FOUNDATION INFORMATION NETWORK
+        </div>
+
+        <div id="boot-log"></div>
+
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+
+        <div id="boot-status">
+            INITIALIZING...
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ACCESS REQUEST
+     ===================================================== -->
+
+<div id="access-screen">
+
+    <div class="access-box">
+
+        <div class="access-label">
+            FOUNDATION // SECURE TERMINAL
+        </div>
+
+        <div class="access-title">
+            SCIPNET ACCESS REQUEST
+        </div>
+
+        <div class="access-text">
+            Would you like to access the Personnel Dossier Storage?
+        </div>
+
+        <div class="access-warning">
+            AUTHORIZED FOUNDATION PERSONNEL ONLY.<br>
+            ALL DATABASE ACTIVITY MAY BE LOGGED AND MONITORED.
+        </div>
+
+        <div class="access-actions">
+
+            <button
+                class="access-button primary"
+                onclick="openStorage()"
+            >
+                OPEN DOSSIER STORAGE
+            </button>
+
+            <button
+                class="access-button exit"
+                onclick="terminateApplication()"
+            >
+                EXIT APPLICATION
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     EXIT CONFIRMATION
+     ===================================================== -->
+
+<div id="exit-confirm">
+
+    <div class="exit-box">
+
+        <div class="exit-label">
+            SCIPNET // SESSION CONTROL
+        </div>
+
+        <div class="exit-title">
+            TERMINATE SCIPNET SESSION?
+        </div>
+
+        <div class="exit-text">
+            Any unsaved changes will be lost. Are you sure you want to leave the Foundation Personnel Database?
+        </div>
+
+        <div class="exit-actions">
+
+            <button
+                class="exit-action"
+                onclick="closeExitConfirmation()"
+            >
+                CANCEL
+            </button>
+
+            <button
+                class="exit-action confirm"
+                onclick="terminateApplication()"
+            >
+                TERMINATE SESSION
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TERMINATED
+     ===================================================== -->
+
+<div id="terminated-screen">
+
+    <div class="terminated-content">
+
+        <div class="terminated-symbol">
+            ×
+        </div>
+
+        <div class="terminated-title">
+            SCIPNET SESSION TERMINATED
+        </div>
+
+        <div class="terminated-subtitle">
+            FOUNDATION SECURE NETWORK // CONNECTION CLOSED
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SKIN ZOOM
+     ===================================================== -->
+
+<div
+    id="skin-zoom-overlay"
+    onclick="handleZoomBackgroundClick(event)"
+>
+
+    <div class="skin-zoom-window">
+
+        <div class="skin-zoom-header">
+
+            <div>
+
+                <div class="skin-zoom-label">
+                    PERSONNEL DATABASE // IMAGE VIEWER
+                </div>
+
+                <div
+                    class="skin-zoom-title"
+                    id="skin-zoom-title"
+                >
+                    PERSONNEL SKIN // FRONT
+                </div>
+
+            </div>
+
+            <button
+                class="skin-zoom-close"
+                onclick="closeSkinZoom()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            class="skin-zoom-view"
+            id="skin-zoom-view"
+        >
+
+            <img
+                id="skin-zoom-image"
+                alt=""
+            >
+
+        </div>
+
+
+        <div class="skin-zoom-controls">
+
+            <button
+                class="zoom-button"
+                onclick="changeZoom(-0.1)"
+            >
+                −
+            </button>
+
+            <div
+                class="zoom-level"
+                id="zoom-level"
+            >
+                100%
+            </div>
+
+            <button
+                class="zoom-button"
+                onclick="changeZoom(0.1)"
+            >
+                +
+            </button>
+
+            <button
+                class="zoom-button"
+                onclick="resetZoom()"
+                style="margin-left:12px;width:60px;font-size:9px;"
+            >
+                RESET
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SCIPNET
+     ===================================================== -->
+
+<div id="scipnet">
+
+
+<header>
+
+    <div class="system-name">
+        SCIPNET
+    </div>
+
+    <div class="site-number">
+        SITE-416
+    </div>
+
+    <div class="status">
+        ● SYSTEM ONLINE
+    </div>
+
+    <button
+        class="header-exit"
+        onclick="openExitConfirmation()"
+    >
+        EXIT
+    </button>
+
+</header>
+
+
+<main>
+
+
+<div class="grid"></div>
+
+
+<img
+    src="scp-logo.png"
+    class="logo-background"
+    alt=""
+>
+
+
+<div class="vignette"></div>
+
+
+<!-- =====================================================
+     DATABASE WORKSPACE
+     ===================================================== -->
+
+<div class="database-workspace">
+
+
+<!-- =====================================================
+     LEFT STORAGE
+     ===================================================== -->
+
+<div class="database-panel dossier-storage">
+
+    <div class="storage-header">
+
+        <div class="storage-label">
+            OMEGA-1 // PERSONNEL DATABASE
+        </div>
+
+        <div class="storage-title">
+            DOSSIER STORAGE
+        </div>
+
+        <button
+            class="new-dossier-button"
+            onclick="createNewDossier()"
+        >
+            + NEW DOSSIER
+        </button>
+
+    </div>
+
+
+    <div class="storage-search">
+
+        <input
+            id="dossier-search"
+            type="text"
+            placeholder="SEARCH PERSONNEL..."
+            oninput="renderDossierList()"
+        >
+
+    </div>
+
+
+    <div
+        id="dossier-list"
+        class="dossier-list"
+    ></div>
+
+
+    <div class="permission-panel">
+
+        <div class="permission-status">
+
+            <div
+                id="permission-text"
+                class="permission-text"
+            >
+                READ ONLY
+            </div>
+
+            <button
+                class="permission-button"
+                onclick="toggleAdminMode()"
+            >
+                CREATOR / ADMIN
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CENTER DOSSIER
+     ===================================================== -->
+
+<div class="personnel-dossier">
+
+
+<div class="dossier-header">
+
+    <div>
+
+        <div class="dossier-label">
+            OMEGA-1 // LAW'S LEFT HAND
+        </div>
+
+        <div class="dossier-title">
+            PERSONNEL DOSSIER
+        </div>
+
+    </div>
+
+
+    <div style="display:flex;align-items:center;">
+
+        <div
+            id="editor-state"
+            class="editor-state"
+        >
+
+            <span class="editor-dot"></span>
+
+            READ ONLY
+
+        </div>
+
+        <div
+            id="dossier-id"
+            class="dossier-id"
+            style="margin-left:20px;"
+        >
+            O1-001
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="dossier-content">
+
+
+<!-- =====================================================
+     BIODATA
+     ===================================================== -->
+
+<div class="biodata-grid">
+
+
+<div class="field">
+
+<label>NAME</label>
+
+<input
+    id="field-name"
+    type="text"
+    placeholder="Enter full name"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>ALIAS(ES)</label>
+
+<input
+    id="field-alias"
+    type="text"
+    placeholder="Enter alias(es)"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>AGE</label>
+
+<input
+    id="field-age"
+    type="number"
+    placeholder="Age"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>GENDER</label>
+
+<input
+    id="field-gender"
+    type="text"
+    placeholder="Gender"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>BLOOD TYPE</label>
+
+<input
+    id="field-blood"
+    type="text"
+    placeholder="Blood type"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>STATUS</label>
+
+<select
+    id="status-select"
+    class="status-select status-active"
+    onchange="updateStatusColor()"
+>
+
+<option value="active">
+● ACTIVE
+</option>
+
+<option value="retired">
+● RETIRED
+</option>
+
+<option value="inactive">
+● INACTIVE
+</option>
+
+<option value="suspended">
+● SUSPENDED
+</option>
+
+<option value="mia">
+● MIA
+</option>
+
+<option value="kia">
+● KIA
+</option>
+
+<option value="transferred">
+● TRANSFERRED
+</option>
+
+<option value="unknown">
+● UNKNOWN
+</option>
+
+</select>
+
+</div>
+
+
+<div class="field">
+
+<label>NATIONALITY</label>
+
+<input
+    id="field-nationality"
+    type="text"
+    placeholder="Nationality"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>HEIGHT</label>
+
+<input
+    id="field-height"
+    type="text"
+    placeholder="Height"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>WEIGHT</label>
+
+<input
+    id="field-weight"
+    type="text"
+    placeholder="Weight"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>AFFILIATIONS</label>
+
+<input
+    id="field-affiliations"
+    type="text"
+    placeholder="Affiliations"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>PLACE OF BIRTH</label>
+
+<input
+    id="field-birthplace"
+    type="text"
+    placeholder="Place of birth"
+>
+
+</div>
+
+
+<!-- =====================================================
+     SPECIALITIES
+     ===================================================== -->
+
+<div class="field speciality-field">
+
+<label>
+OCCUPATIONAL SPECIALITIES
+</label>
+
+
+<div
+    class="speciality-dropdown"
+    id="speciality-dropdown"
+>
+
+
+<button
+    type="button"
+    class="speciality-button"
+    onclick="toggleSpecialities()"
+>
+
+<span id="speciality-text">
+SELECT SPECIALITIES
+</span>
+
+<span class="speciality-arrow">
+⌄
+</span>
+
+</button>
+
+
+<div
+    id="speciality-menu"
+    class="speciality-menu"
+>
+
+
+<label class="speciality-option">
+
+<input
+    type="checkbox"
+    value="Asclepius"
+    onchange="updateSpecialities()"
+>
+
+<span>
+Asclepius
+</span>
+
+</label>
+
+
+<label class="speciality-option">
+
+<input
+    type="checkbox"
+    value="Achilles"
+    onchange="updateSpecialities()"
+>
+
+<span>
+Achilles
+</span>
+
+</label>
+
+
+<label class="speciality-option">
+
+<input
+    type="checkbox"
+    value="Ares"
+    onchange="updateSpecialities()"
+>
+
+<span>
+Ares
+</span>
+
+</label>
+
+
+<label class="speciality-option">
+
+<input
+    type="checkbox"
+    value="Strategic Command"
+    onchange="updateSpecialities()"
+>
+
+<span>
+Strategic Command
+</span>
+
+</label>
+
+
+<label class="speciality-option">
+
+<input
+    type="checkbox"
+    value="Hercules"
+    onchange="updateSpecialities()"
+>
+
+<span>
+Hercules
+</span>
+
+</label>
+
+
+<label class="speciality-option">
+
+<input
+    type="checkbox"
+    value="Ξ"
+    onchange="updateSpecialities()"
+>
+
+<span>
+Ξ
+</span>
+
+</label>
+
+
+<div class="speciality-limit">
+MAXIMUM 2 SPECIALITIES
+</div>
+
+
+</div>
+
+</div>
+
+
+<div
+    id="selected-specialities"
+    class="selected-specialities"
+></div>
+
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================================
+     HISTORY / NOTES
+     ===================================================== -->
+
+<div class="records-grid">
+
+
+<!-- HISTORY -->
+
+<div class="record-box history-box">
+
+<div class="record-header">
+
+<div class="record-title">
+PERSONNEL HISTORY
+</div>
+
+<button
+    class="record-add"
+    onclick="focusHistory()"
+>
+EDIT
+</button>
+
+</div>
+
+
+<div class="record-content history-editor-content">
+
+<input
+    id="history-title"
+    class="record-heading"
+    type="text"
+    placeholder="Entry title..."
+>
+
+
+<div
+    id="history-toolbar"
+    class="history-toolbar"
+>
+
+<button
+    type="button"
+    onclick="formatHistory('bold')"
+    title="Bold"
+>
+<b>B</b>
+</button>
+
+
+<button
+    type="button"
+    onclick="formatHistory('italic')"
+    title="Italic"
+>
+<i>I</i>
+</button>
+
+
+<button
+    type="button"
+    onclick="formatHistory('underline')"
+    title="Underline"
+>
+<u>U</u>
+</button>
+
+
+<div class="toolbar-divider"></div>
+
+
+<select
+    onchange="changeHistoryFontSize(this.value)"
+    title="Font size"
+>
+
+<option value="2">
+SMALL
+</option>
+
+<option value="3" selected>
+NORMAL
+</option>
+
+<option value="4">
+LARGE
+</option>
+
+<option value="5">
+XL
+</option>
+
+<option value="6">
+XXL
+</option>
+
+</select>
+
+
+<div class="toolbar-divider"></div>
+
+
+<button
+    type="button"
+    onclick="formatHistory('insertUnorderedList')"
+    title="Bullet list"
+>
+• LIST
+</button>
+
+
+<button
+    type="button"
+    onclick="formatHistory('insertOrderedList')"
+    title="Numbered list"
+>
+1. LIST
+</button>
+
+</div>
+
+
+<div
+    id="history-text"
+    class="history-editor"
+    contenteditable="true"
+    data-placeholder="Enter personnel history, previous assignments, career history, notable events, transfers, disciplinary records, etc."
+></div>
+
+</div>
+
+</div>
+
+
+<!-- NOTES -->
+
+<div class="record-box">
+
+<div class="record-header">
+
+<div class="record-title">
+PERSONNEL NOTES
+</div>
+
+<button
+    class="record-add"
+    onclick="focusNotes()"
+>
+EDIT
+</button>
+
+</div>
+
+
+<div class="record-content">
+
+<input
+    id="notes-title"
+    class="record-heading"
+    type="text"
+    placeholder="Note title..."
+>
+
+
+<textarea
+    id="notes-text"
+    class="record-text"
+    placeholder="Enter additional notes, observations, administrative information, warnings, comments, or other relevant information."
+></textarea>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================================
+     SKIN
+     ===================================================== -->
+
+<div class="skin-section">
+
+
+<div class="skin-previews">
+
+
+<div class="skin-card">
+
+<div class="skin-card-label">
+FRONT
+</div>
+
+<div
+    class="skin-preview"
+    onclick="openSkinZoom('front')"
+>
+
+<img
+    id="skin-front-preview"
+    alt=""
+>
+
+</div>
+
+</div>
+
+
+<div class="skin-card">
+
+<div class="skin-card-label">
+BACK
+</div>
+
+<div
+    class="skin-preview"
+    onclick="openSkinZoom('back')"
+>
+
+<img
+    id="skin-back-preview"
+    alt=""
+>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<div class="skin-information">
+
+<div class="skin-label">
+PERSONNEL SKIN // PNG
+</div>
+
+<div class="skin-description">
+
+Attach PNG images representing the personnel's
+appearance or Roblox skin. Separate front and
+back views are supported. Images are automatically
+cropped to the square preview and stored with
+the dossier.
+
+</div>
+
+
+<button
+    class="skin-button"
+    onclick="openSkinUpload()"
+>
++ ADD FRONT PNG
+</button>
+
+
+<button
+    class="skin-button"
+    onclick="openBackSkinUpload()"
+>
++ ADD BACK PNG
+</button>
+
+<input
+    id="skin-input"
+    type="file"
+    accept="image/png"
+    onchange="handleSkinUpload(event)"
+>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     ACTIONS
+     ===================================================== -->
+
+<div class="action-bar">
+
+
+<div class="action-left">
+
+<button
+    class="action-button save-button"
+    onclick="saveCurrentDossier()"
+>
+SAVE DOSSIER
+</button>
+
+<button
+    class="action-button delete-button"
+    onclick="deleteCurrentDossier()"
+>
+DELETE
+</button>
+
+</div>
+
+
+<div
+    id="save-status"
+    class="save-status"
+>
+NO CHANGES
+</div>
+
+
+</div>
+
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     RIGHT INFORMATION
+     ===================================================== -->
+
+<div class="database-panel system-info">
+
+
+<div class="info-block">
+
+<div class="info-title">
+SATELLITE IMAGERY
+</div>
+
+
+<img
+    class="mini-satellite"
+    src="https://eu-space.europa.eu/sites/default/files/2026-04/20260502_Galdh%C3%B8piggen.webp"
+    alt="Satellite imagery of Jotunheimen"
+>
+
+
+<div class="satellite-caption">
+
+SOURCE // COPERNICUS SENTINEL-2<br>
+REGION // SVALBARD, NORWAY<br>
+IMAGERY // ORBITAL FEED
+
+</div>
+
+</div>
+
+
+<div class="info-block">
+
+<div class="info-title">
+FOUNDATION NETWORK
+</div>
+
+
+<div class="info-line">
+
+<span>
+SCIPNET CORE
+</span>
+
+<span class="online">
+ONLINE
+</span>
+
+</div>
+
+
+<div class="info-line">
+
+<span>
+DATABASE
+</span>
+
+<span class="online">
+ONLINE
+</span>
+
+</div>
+
+
+<div class="info-line">
+
+<span>
+SECURITY
+</span>
+
+<span class="online">
+ACTIVE
+</span>
+
+</div>
+
+
+<div class="info-line">
+
+<span>
+CONNECTION
+</span>
+
+<span class="online">
+SECURE
+</span>
+
+</div>
+
+</div>
+
+
+<div class="info-block">
+
+<div class="info-title">
+CURRENT LOCATION
+</div>
+
+<div class="location-value">
+SITE-416
+</div>
+
+<div class="coordinates">
+
+NORWAY<br>
+SVALBARD REGION<br>
+FOUNDATION TERRITORY
+
+</div>
+
+</div>
+
+
+<div class="info-block">
+
+<div class="info-title">
+NETWORK ACTIVITY
+</div>
+
+
+<div class="info-line">
+
+<span>
+UPLINK
+</span>
+
+<span class="online">
+STABLE
+</span>
+
+</div>
+
+
+<div class="info-line">
+
+<span>
+LATENCY
+</span>
+
+<span id="latency">
+24ms
+</span>
+
+</div>
+
+
+<div class="network-graph">
+
+<div class="network-bar"></div>
+<div class="network-bar"></div>
+<div class="network-bar"></div>
+<div class="network-bar"></div>
+<div class="network-bar"></div>
+<div class="network-bar"></div>
+<div class="network-bar"></div>
+<div class="network-bar"></div>
+
+</div>
+
+</div>
+
+
+<div class="info-block">
+
+<div class="info-title">
+SYSTEM TIME
+</div>
+
+<div
+    class="system-time"
+    id="system-time"
+>
+--:--:--
+</div>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<div class="system-footer">
+
+FOUNDATION SECURE NETWORK
+//
+SCIPNET DIRECT ACCESS
+//
+OMEGA-1 PERSONNEL DATABASE
+
+</div>
+
+
+<div class="scanline"></div>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   BOOT SEQUENCE
+   ========================================================= */
+
+const bootLog =
+    document.getElementById("boot-log");
+
+const progressBar =
+    document.getElementById("progress-bar");
+
+const bootStatus =
+    document.getElementById("boot-status");
+
+const bootScreen =
+    document.getElementById("boot-screen");
+
+const scipnet =
+    document.getElementById("scipnet");
+
+const accessScreen =
+    document.getElementById("access-screen");
+
+
+const bootSteps = [
+
+    {
+        text: "[ OK ] Initializing SCIPNET Kernel",
+        progress: 10,
+        delay: 350
+    },
+
+    {
+        text: "[ OK ] Loading Foundation Network",
+        progress: 24,
+        delay: 400
+    },
+
+    {
+        text: "[ OK ] Establishing Secure Connection",
+        progress: 39,
+        delay: 450
+    },
+
+    {
+        text: "[ OK ] Verifying Security Protocols",
+        progress: 54,
+        delay: 400
+    },
+
+    {
+        text: "[ OK ] Loading Site Database",
+        progress: 69,
+        delay: 450
+    },
+
+    {
+        text: "[ OK ] Synchronizing Personnel Records",
+        progress: 82,
+        delay: 400
+    },
+
+    {
+        text: "[ OK ] Loading Omega-1 Database",
+        progress: 94,
+        delay: 450
+    },
+
+    {
+        text: "[ OK ] SCIPNET Initialization Complete",
+        progress: 100,
+        delay: 600
+    }
+
+];
+
+
+function wait(milliseconds) {
+
+    return new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                milliseconds
+            )
+    );
+
+}
+
+
+async function startBootSequence() {
+
+    for (const step of bootSteps) {
+
+        await wait(step.delay);
+
+        const line =
+            document.createElement("div");
+
+        line.classList.add("boot-line");
+
+        line.textContent =
+            step.text;
+
+        bootLog.appendChild(line);
+
+        progressBar.style.width =
+            step.progress + "%";
+
+        bootStatus.textContent =
+            "INITIALIZING... " +
+            step.progress +
+            "%";
+
+    }
+
+    await wait(700);
+
+    bootStatus.textContent =
+        "SYSTEM READY";
+
+    await wait(900);
+
+    bootScreen.classList.add("hidden");
+
+    await wait(900);
+
+    accessScreen.classList.add("visible");
+
+}
+
+
+/* =========================================================
+   OPEN STORAGE
+   ========================================================= */
+
+function openStorage() {
+
+    accessScreen.classList.remove(
+        "visible"
+    );
+
+    scipnet.classList.add(
+        "visible"
+    );
+
+}
+
+
+/* =========================================================
+   EXIT / TERMINATION
+   ========================================================= */
+
+const exitConfirm =
+    document.getElementById(
+        "exit-confirm"
+    );
+
+const terminatedScreen =
+    document.getElementById(
+        "terminated-screen"
+    );
+
+
+function openExitConfirmation() {
+
+    exitConfirm.classList.add(
+        "visible"
+    );
+
+}
+
+
+function closeExitConfirmation() {
+
+    exitConfirm.classList.remove(
+        "visible"
+    );
+
+}
+
+
+function terminateApplication() {
+
+    accessScreen.classList.remove(
+        "visible"
+    );
+
+    exitConfirm.classList.remove(
+        "visible"
+    );
+
+    scipnet.classList.remove(
+        "visible"
+    );
+
+    terminatedScreen.classList.add(
+        "visible"
+    );
+
+    /*
+       Browsers normally prevent JavaScript from
+       closing a tab/window that was not opened by
+       JavaScript. Therefore the Foundation-style
+       termination screen is used as the reliable
+       fallback.
+    */
+
+    try {
+
+        window.close();
+
+    } catch (error) {
+
+        console.log(
+            "SCIPNET session terminated."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SYSTEM TIME
+   ========================================================= */
+
+const systemTime =
+    document.getElementById(
+        "system-time"
+    );
+
+
+function updateTime() {
+
+    const now =
+        new Date();
+
+    const hours =
+        String(now.getHours()).padStart(
+            2,
+            "0"
+        );
+
+    const minutes =
+        String(now.getMinutes()).padStart(
+            2,
+            "0"
+        );
+
+    const seconds =
+        String(now.getSeconds()).padStart(
+            2,
+            "0"
+        );
+
+    systemTime.textContent =
+        hours + ":" +
+        minutes + ":" +
+        seconds;
+
+}
+
+
+updateTime();
+
+setInterval(
+    updateTime,
+    1000
+);
+
+
+/* =========================================================
+   LATENCY
+   ========================================================= */
+
+const latency =
+    document.getElementById(
+        "latency"
+    );
+
+
+function updateLatency() {
+
+    const value =
+        Math.floor(
+            Math.random() * 8
+        ) + 20;
+
+    latency.textContent =
+        value + "ms";
+
+}
+
+
+updateLatency();
+
+setInterval(
+    updateLatency,
+    2500
+);
+
+
+/* =========================================================
+   STORAGE
+   ========================================================= */
+
+const STORAGE_KEY =
+    "scipnet_omega1_personnel";
+
+const USER_KEY =
+    "scipnet_local_user";
+
+
+let localUserId =
+    localStorage.getItem(
+        USER_KEY
+    );
+
+
+if (!localUserId) {
+
+    localUserId =
+        "USER-" +
+        crypto.randomUUID();
+
+    localStorage.setItem(
+        USER_KEY,
+        localUserId
+    );
+
+}
+
+
+let dossiers =
+    JSON.parse(
+        localStorage.getItem(
+            STORAGE_KEY
+        ) || "[]"
+    );
+
+
+let currentDossierId =
+    null;
+
+
+/* =========================================================
+   ADMIN
+   ========================================================= */
+
+let adminMode =
+    false;
+
+const ADMIN_CODE =
+    "SCPO1-ADMIN";
+
+
+/* =========================================================
+   DOSSIER OBJECT
+   ========================================================= */
+
+function createEmptyDossier(id) {
+
+    return {
+
+        id:
+            id,
+
+        owner:
+            localUserId,
+
+        name:
+            "",
+
+        alias:
+            "",
+
+        age:
+            "",
+
+        gender:
+            "",
+
+        blood:
+            "",
+
+        status:
+            "active",
+
+        nationality:
+            "",
+
+        height:
+            "",
+
+        weight:
+            "",
+
+        affiliations:
+            "",
+
+        birthplace:
+            "",
+
+        specialities:
+            [],
+
+        historyTitle:
+            "",
+
+        historyText:
+            "",
+
+        notesTitle:
+            "",
+
+        notesText:
+            "",
+
+        skinFront:
+            "",
+
+        skinBack:
+            "",
+
+        /* compatibility with older dossiers */
+        skin:
+            "",
+
+        updated:
+            Date.now()
+
+    };
+
+}
+
+
+/* =========================================================
+   INITIAL / DEMO DOSSIER
+   ========================================================= */
+
+if (dossiers.length === 0) {
+
+    dossiers.push(
+        createEmptyDossier("O1-001")
+    );
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(dossiers)
+    );
+
+}
+
+
+dossiers.forEach(
+    dossier => {
+
+        if (
+            !dossier.owner &&
+            dossier.id === "O1-001" &&
+            !dossier.name
+        ) {
+
+            dossier.owner =
+                localUserId;
+
+        }
+
+        /* Upgrade old dossier structure */
+
+        if (
+            typeof dossier.skinFront ===
+            "undefined"
+        ) {
+
+            dossier.skinFront =
+                dossier.skin || "";
+
+        }
+
+        if (
+            typeof dossier.skinBack ===
+            "undefined"
+        ) {
+
+            dossier.skinBack =
+                "";
+
+        }
+
+    }
+);
+
+
+localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(dossiers)
+);
+
+
+currentDossierId =
+    dossiers[0].id;
+
+
+/* =========================================================
+   GET CURRENT DOSSIER
+   ========================================================= */
+
+function getCurrentDossier() {
+
+    return dossiers.find(
+        dossier =>
+            dossier.id ===
+            currentDossierId
+    );
+
+}
+
+
+/* =========================================================
+   CAN EDIT CURRENT DOSSIER
+   ========================================================= */
+
+function canEditCurrentDossier() {
+
+    const dossier =
+        getCurrentDossier();
+
+    if (!dossier)
+        return false;
+
+    if (adminMode)
+        return true;
+
+    return dossier.owner === localUserId;
+
+}
+
+
+/* =========================================================
+   RENDER DOSSIER LIST
+   ========================================================= */
+
+function renderDossierList() {
+
+    const container =
+        document.getElementById(
+            "dossier-list"
+        );
+
+    const search =
+        document.getElementById(
+            "dossier-search"
+        ).value
+        .toLowerCase()
+        .trim();
+
+
+    container.innerHTML =
+        "";
+
+
+    dossiers
+        .filter(
+            dossier => {
+
+                const searchable =
+                    (
+                        dossier.name +
+                        " " +
+                        dossier.alias +
+                        " " +
+                        dossier.id
+                    ).toLowerCase();
+
+                return searchable.includes(
+                    search
+                );
+
+            }
+        )
+        .forEach(
+            dossier => {
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                const dossierStatus =
+                    (
+                        dossier.status ||
+                        "unknown"
+                    ).toLowerCase();
+
+
+                card.className =
+                    "dossier-card status-" +
+                    dossierStatus +
+                    (
+                        dossier.id ===
+                        currentDossierId
+                            ? " selected"
+                            : ""
+                    );
+
+
+                card.onclick =
+                    () =>
+                        selectDossier(
+                            dossier.id
+                        );
+
+
+                const id =
+                    document.createElement(
+                        "div"
+                    );
+
+                id.className =
+                    "card-id";
+
+                id.textContent =
+                    dossier.id;
+
+
+                const name =
+                    document.createElement(
+                        "div"
+                    );
+
+                name.className =
+                    "card-name";
+
+                name.textContent =
+                    dossier.name ||
+                    "UNNAMED PERSONNEL";
+
+
+                const status =
+                    document.createElement(
+                        "div"
+                    );
+
+                status.className =
+                    "card-status";
+
+                status.textContent =
+                    "● " +
+                    dossierStatus.toUpperCase();
+
+
+                const ownership =
+                    document.createElement(
+                        "div"
+                    );
+
+                ownership.className =
+                    "card-ownership";
+
+
+                if (
+                    dossier.owner ===
+                    localUserId
+                ) {
+
+                    ownership.textContent =
+                        "LOCAL PERSONNEL";
+
+                } else {
+
+                    ownership.textContent =
+                        "RESTRICTED ACCESS";
+
+                }
+
+
+                card.appendChild(
+                    id
+                );
+
+                card.appendChild(
+                    name
+                );
+
+                card.appendChild(
+                    status
+                );
+
+                card.appendChild(
+                    ownership
+                );
+
+                container.appendChild(
+                    card
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   SELECT DOSSIER
+   ========================================================= */
+
+function selectDossier(id) {
+
+    closeSkinZoom();
+
+    currentDossierId =
+        id;
+
+    loadDossier();
+
+    renderDossierList();
+
+    const dossier =
+        getCurrentDossier();
+
+
+    if (
+        dossier &&
+        canEditCurrentDossier()
+    ) {
+
+        setSaveStatus(
+            "OWNED DOSSIER — EDITABLE"
+        );
+
+    } else {
+
+        setSaveStatus(
+            "READ ONLY — RESTRICTED DOSSIER"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD DOSSIER
+   ========================================================= */
+
+function loadDossier() {
+
+    const dossier =
+        getCurrentDossier();
+
+    if (!dossier)
+        return;
+
+
+    document.getElementById(
+        "dossier-id"
+    ).textContent =
+        dossier.id;
+
+
+    document.getElementById(
+        "field-name"
+    ).value =
+        dossier.name || "";
+
+
+    document.getElementById(
+        "field-alias"
+    ).value =
+        dossier.alias || "";
+
+
+    document.getElementById(
+        "field-age"
+    ).value =
+        dossier.age || "";
+
+
+    document.getElementById(
+        "field-gender"
+    ).value =
+        dossier.gender || "";
+
+
+    document.getElementById(
+        "field-blood"
+    ).value =
+        dossier.blood || "";
+
+
+    document.getElementById(
+        "status-select"
+    ).value =
+        dossier.status || "active";
+
+
+    document.getElementById(
+        "field-nationality"
+    ).value =
+        dossier.nationality || "";
+
+
+    document.getElementById(
+        "field-height"
+    ).value =
+        dossier.height || "";
+
+
+    document.getElementById(
+        "field-weight"
+    ).value =
+        dossier.weight || "";
+
+
+    document.getElementById(
+        "field-affiliations"
+    ).value =
+        dossier.affiliations || "";
+
+
+    document.getElementById(
+        "field-birthplace"
+    ).value =
+        dossier.birthplace || "";
+
+
+    document.getElementById(
+        "history-title"
+    ).value =
+        dossier.historyTitle || "";
+
+
+    document.getElementById(
+        "history-text"
+    ).innerHTML =
+        dossier.historyText || "";
+
+
+    document.getElementById(
+        "notes-title"
+    ).value =
+        dossier.notesTitle || "";
+
+
+    document.getElementById(
+        "notes-text"
+    ).value =
+        dossier.notesText || "";
+
+
+    loadSpecialities(
+        dossier.specialities || []
+    );
+
+
+    /* =====================================================
+       LOAD FRONT SKIN
+       ===================================================== */
+
+    const frontImage =
+        document.getElementById(
+            "skin-front-preview"
+        );
+
+
+    const frontSkin =
+        dossier.skinFront ||
+        dossier.skin ||
+        "";
+
+
+    if (frontSkin) {
+
+        frontImage.src =
+            frontSkin;
+
+        frontImage.style.display =
+            "block";
+
+    } else {
+
+        frontImage.removeAttribute(
+            "src"
+        );
+
+        frontImage.style.display =
+            "none";
+
+    }
+
+
+    /* =====================================================
+       LOAD BACK SKIN
+       ===================================================== */
+
+    const backImage =
+        document.getElementById(
+            "skin-back-preview"
+        );
+
+
+    const backSkin =
+        dossier.skinBack ||
+        "";
+
+
+    if (backSkin) {
+
+        backImage.src =
+            backSkin;
+
+        backImage.style.display =
+            "block";
+
+    } else {
+
+        backImage.removeAttribute(
+            "src"
+        );
+
+        backImage.style.display =
+            "none";
+
+    }
+
+
+    updateStatusColor();
+
+    updateEditorPermissions();
+
+}
+
+
+/* =========================================================
+   CREATE NEW DOSSIER
+   ========================================================= */
+
+function createNewDossier() {
+
+    let number =
+        dossiers.length + 1;
+
+
+    let newId =
+        "O1-" +
+        String(number).padStart(
+            3,
+            "0"
+        );
+
+
+    while (
+        dossiers.some(
+            dossier =>
+                dossier.id === newId
+        )
+    ) {
+
+        number++;
+
+        newId =
+            "O1-" +
+            String(number).padStart(
+                3,
+                "0"
+            );
+
+    }
+
+
+    const newDossier =
+        createEmptyDossier(
+            newId
+        );
+
+
+    newDossier.owner =
+        localUserId;
+
+
+    dossiers.push(
+        newDossier
+    );
+
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(dossiers)
+    );
+
+
+    currentDossierId =
+        newId;
+
+
+    loadDossier();
+
+    renderDossierList();
+
+    setSaveStatus(
+        "NEW PERSONAL DOSSIER CREATED"
+    );
+
+}
+
+
+/* =========================================================
+   SAVE DOSSIER
+   ========================================================= */
+
+function saveCurrentDossier() {
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        alert(
+            "ACCESS DENIED.\n\nYou can only edit your own personnel dossier."
+        );
+
+        return;
+
+    }
+
+
+    const dossier =
+        getCurrentDossier();
+
+    if (!dossier)
+        return;
+
+
+    dossier.name =
+        document.getElementById(
+            "field-name"
+        ).value;
+
+
+    dossier.alias =
+        document.getElementById(
+            "field-alias"
+        ).value;
+
+
+    dossier.age =
+        document.getElementById(
+            "field-age"
+        ).value;
+
+
+    dossier.gender =
+        document.getElementById(
+            "field-gender"
+        ).value;
+
+
+    dossier.blood =
+        document.getElementById(
+            "field-blood"
+        ).value;
+
+
+    dossier.status =
+        document.getElementById(
+            "status-select"
+        ).value;
+
+
+    dossier.nationality =
+        document.getElementById(
+            "field-nationality"
+        ).value;
+
+
+    dossier.height =
+        document.getElementById(
+            "field-height"
+        ).value;
+
+
+    dossier.weight =
+        document.getElementById(
+            "field-weight"
+        ).value;
+
+
+    dossier.affiliations =
+        document.getElementById(
+            "field-affiliations"
+        ).value;
+
+
+    dossier.birthplace =
+        document.getElementById(
+            "field-birthplace"
+        ).value;
+
+
+    dossier.historyTitle =
+        document.getElementById(
+            "history-title"
+        ).value;
+
+
+    dossier.historyText =
+        document.getElementById(
+            "history-text"
+        ).innerHTML;
+
+
+    dossier.notesTitle =
+        document.getElementById(
+            "notes-title"
+        ).value;
+
+
+    dossier.notesText =
+        document.getElementById(
+            "notes-text"
+        ).value;
+
+
+    dossier.specialities =
+        Array.from(
+            document.querySelectorAll(
+                '.speciality-option input[type="checkbox"]:checked'
+            )
+        ).map(
+            checkbox =>
+                checkbox.value
+        );
+
+
+    dossier.updated =
+        Date.now();
+
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(dossiers)
+    );
+
+
+    renderDossierList();
+
+    setSaveStatus(
+        "DATABASE UPDATED"
+    );
+
+}
+
+
+/* =========================================================
+   DELETE DOSSIER
+   ========================================================= */
+
+function deleteCurrentDossier() {
+
+    const dossier =
+        getCurrentDossier();
+
+    if (!dossier)
+        return;
+
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        alert(
+            "ACCESS DENIED.\n\nYou cannot delete another user's dossier."
+        );
+
+        return;
+
+    }
+
+
+    if (dossiers.length <= 1) {
+
+        alert(
+            "AT LEAST ONE DOSSIER MUST REMAIN."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !confirm(
+            "DELETE DOSSIER " +
+            dossier.id +
+            "?\n\nThis action cannot be undone."
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    dossiers =
+        dossiers.filter(
+            item =>
+                item.id !==
+                currentDossierId
+        );
+
+
+    currentDossierId =
+        dossiers[0].id;
+
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(dossiers)
+    );
+
+
+    loadDossier();
+
+    renderDossierList();
+
+    setSaveStatus(
+        "DOSSIER DELETED"
+    );
+
+}
+
+
+/* =========================================================
+   STATUS COLORS
+   ========================================================= */
+
+function updateStatusColor() {
+
+    const select =
+        document.getElementById(
+            "status-select"
+        );
+
+
+    const value =
+        select.value;
+
+
+    select.className =
+        "status-select";
+
+
+    select.classList.add(
+        "status-" +
+        value
+    );
+
+}
+
+
+/* =========================================================
+   SPECIALITIES
+   ========================================================= */
+
+function toggleSpecialities() {
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        alert(
+            "READ ONLY.\n\nYou can only edit specialities on your own dossier."
+        );
+
+        return;
+
+    }
+
+
+    const dropdown =
+        document.getElementById(
+            "speciality-dropdown"
+        );
+
+    const menu =
+        document.getElementById(
+            "speciality-menu"
+        );
+
+
+    dropdown.classList.toggle(
+        "open"
+    );
+
+    menu.classList.toggle(
+        "open"
+    );
+
+}
+
+
+function updateSpecialities() {
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        loadDossier();
+
+        return;
+
+    }
+
+
+    const checkboxes =
+        document.querySelectorAll(
+            '.speciality-option input[type="checkbox"]'
+        );
+
+
+    const selected = [];
+
+
+    checkboxes.forEach(
+        checkbox => {
+
+            if (
+                checkbox.checked
+            ) {
+
+                selected.push(
+                    checkbox.value
+                );
+
+            }
+
+        }
+    );
+
+
+    if (
+        selected.length > 2
+    ) {
+
+        const last =
+            selected[
+                selected.length - 1
+            ];
+
+
+        checkboxes.forEach(
+            checkbox => {
+
+                if (
+                    checkbox.value ===
+                    last
+                ) {
+
+                    checkbox.checked =
+                        false;
+
+                }
+
+            }
+        );
+
+
+        selected.pop();
+
+    }
+
+
+    updateSpecialityInterface(
+        selected
+    );
+
+
+    setSaveStatus(
+        "UNSAVED CHANGES"
+    );
+
+}
+
+
+function updateSpecialityInterface(
+    selected
+) {
+
+    const checkboxes =
+        document.querySelectorAll(
+            '.speciality-option input[type="checkbox"]'
+        );
+
+
+    checkboxes.forEach(
+        checkbox => {
+
+            if (
+                selected.length >= 2 &&
+                !checkbox.checked
+            ) {
+
+                checkbox.disabled =
+                    true;
+
+                checkbox.parentElement.style.opacity =
+                    "0.25";
+
+            } else {
+
+                checkbox.disabled =
+                    false;
+
+                checkbox.parentElement.style.opacity =
+                    "1";
+
+            }
+
+        }
+    );
+
+
+    const text =
+        document.getElementById(
+            "speciality-text"
+        );
+
+
+    if (
+        selected.length === 0
+    ) {
+
+        text.textContent =
+            "SELECT SPECIALITIES";
+
+    } else {
+
+        text.textContent =
+            selected.join(
+                " // "
+            );
+
+    }
+
+
+    const tagContainer =
+        document.getElementById(
+            "selected-specialities"
+        );
+
+
+    tagContainer.innerHTML =
+        "";
+
+
+    selected.forEach(
+        speciality => {
+
+            const tag =
+                document.createElement(
+                    "div"
+                );
+
+
+            tag.className =
+                "speciality-tag";
+
+
+            tag.textContent =
+                speciality.toUpperCase();
+
+
+            tagContainer.appendChild(
+                tag
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LOAD SPECIALITIES
+   ========================================================= */
+
+function loadSpecialities(
+    selectedValues
+) {
+
+    const checkboxes =
+        document.querySelectorAll(
+            '.speciality-option input[type="checkbox"]'
+        );
+
+
+    checkboxes.forEach(
+        checkbox => {
+
+            checkbox.checked =
+                selectedValues.includes(
+                    checkbox.value
+                );
+
+        }
+    );
+
+
+    const selected =
+        Array.from(
+            checkboxes
+        )
+        .filter(
+            checkbox =>
+                checkbox.checked
+        )
+        .map(
+            checkbox =>
+                checkbox.value
+        );
+
+
+    updateSpecialityInterface(
+        selected
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE SPECIALITY MENU
+   ========================================================= */
+
+document.addEventListener(
+    "click",
+    function(event) {
+
+        const dropdown =
+            document.getElementById(
+                "speciality-dropdown"
+            );
+
+        const menu =
+            document.getElementById(
+                "speciality-menu"
+            );
+
+
+        if (
+            dropdown &&
+            !dropdown.contains(
+                event.target
+            )
+        ) {
+
+            dropdown.classList.remove(
+                "open"
+            );
+
+            menu.classList.remove(
+                "open"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SKIN UPLOAD TARGET
+   ========================================================= */
+
+let skinUploadTarget =
+    "front";
+
+
+function openSkinUpload() {
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        alert(
+            "READ ONLY.\n\nYou can only change the skin on your own dossier."
+        );
+
+        return;
+
+    }
+
+    skinUploadTarget =
+        "front";
+
+    const input =
+        document.getElementById(
+            "skin-input"
+        );
+
+    input.value =
+        "";
+
+    input.click();
+
+}
+
+
+function openBackSkinUpload() {
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        alert(
+            "READ ONLY.\n\nYou can only change the skin on your own dossier."
+        );
+
+        return;
+
+    }
+
+    skinUploadTarget =
+        "back";
+
+    const input =
+        document.getElementById(
+            "skin-input"
+        );
+
+    input.value =
+        "";
+
+    input.click();
+
+}
+
+
+/* =========================================================
+   SKIN PNG UPLOAD
+   ========================================================= */
+
+function handleSkinUpload(event) {
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        alert(
+            "READ ONLY.\n\nYou can only change the skin on your own dossier."
+        );
+
+        return;
+
+    }
+
+
+    const file =
+        event.target.files[0];
+
+
+    if (!file)
+        return;
+
+
+    if (
+        file.type !==
+        "image/png"
+    ) {
+
+        alert(
+            "ONLY PNG FILES ARE ALLOWED."
+        );
+
+        event.target.value =
+            "";
+
+        return;
+
+    }
+
+
+    if (
+        file.size >
+        2 * 1024 * 1024
+    ) {
+
+        alert(
+            "PNG FILE IS TOO LARGE.\n\nMaximum size: 2 MB."
+        );
+
+        event.target.value =
+            "";
+
+        return;
+
+    }
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload =
+        function(e) {
+
+            const dossier =
+                getCurrentDossier();
+
+
+            if (!dossier)
+                return;
+
+
+            const imageData =
+                e.target.result;
+
+
+            if (
+                skinUploadTarget ===
+                "back"
+            ) {
+
+                dossier.skinBack =
+                    imageData;
+
+
+                const image =
+                    document.getElementById(
+                        "skin-back-preview"
+                    );
+
+
+                image.src =
+                    imageData;
+
+                image.style.display =
+                    "block";
+
+
+                setSaveStatus(
+                    "BACK PNG ATTACHED — SAVE REQUIRED"
+                );
+
+            } else {
+
+                dossier.skinFront =
+                    imageData;
+
+                /* compatibility */
+                dossier.skin =
+                    imageData;
+
+
+                const image =
+                    document.getElementById(
+                        "skin-front-preview"
+                    );
+
+
+                image.src =
+                    imageData;
+
+                image.style.display =
+                    "block";
+
+
+                setSaveStatus(
+                    "FRONT PNG ATTACHED — SAVE REQUIRED"
+                );
+
+            }
+
+        };
+
+
+    reader.readAsDataURL(
+        file
+    );
+
+}
+
+
+/* =========================================================
+   HISTORY RICH TEXT
+   ========================================================= */
+
+let savedHistoryRange =
+    null;
+
+
+function saveHistorySelection() {
+
+    const editor =
+        document.getElementById(
+            "history-text"
+        );
+
+
+    const selection =
+        window.getSelection();
+
+
+    if (
+        !selection ||
+        selection.rangeCount === 0
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        editor.contains(
+            selection.anchorNode
+        )
+    ) {
+
+        savedHistoryRange =
+            selection.getRangeAt(0);
+
+    }
+
+}
+
+
+function restoreHistorySelection() {
+
+    const editor =
+        document.getElementById(
+            "history-text"
+        );
+
+
+    if (
+        !savedHistoryRange
+    ) {
+
+        editor.focus();
+
+        return;
+
+    }
+
+
+    const selection =
+        window.getSelection();
+
+
+    selection.removeAllRanges();
+
+    selection.addRange(
+        savedHistoryRange
+    );
+
+    editor.focus();
+
+}
+
+
+function formatHistory(command) {
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        alert(
+            "READ ONLY.\n\nYou can only edit your own personnel history."
+        );
+
+        return;
+
+    }
+
+
+    restoreHistorySelection();
+
+
+    document.execCommand(
+        command,
+        false,
+        null
+    );
+
+
+    saveHistorySelection();
+
+
+    setSaveStatus(
+        "UNSAVED CHANGES"
+    );
+
+}
+
+
+function changeHistoryFontSize(size) {
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        alert(
+            "READ ONLY.\n\nYou can only edit your own personnel history."
+        );
+
+        return;
+
+    }
+
+
+    restoreHistorySelection();
+
+
+    document.execCommand(
+        "fontSize",
+        false,
+        size
+    );
+
+
+    saveHistorySelection();
+
+
+    setSaveStatus(
+        "UNSAVED CHANGES"
+    );
+
+}
+
+
+document.addEventListener(
+    "selectionchange",
+    function() {
+
+        saveHistorySelection();
+
+    }
+);
+
+
+/* =========================================================
+   HISTORY / NOTES FOCUS
+   ========================================================= */
+
+function focusHistory() {
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        alert(
+            "READ ONLY.\n\nThis dossier belongs to another user."
+        );
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "history-text"
+    ).focus();
+
+}
+
+
+function focusNotes() {
+
+    if (
+        !canEditCurrentDossier()
+    ) {
+
+        alert(
+            "READ ONLY.\n\nThis dossier belongs to another user."
+        );
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "notes-text"
+    ).focus();
+
+}
+
+
+/* =========================================================
+   SAVE STATUS
+   ========================================================= */
+
+function setSaveStatus(text) {
+
+    document.getElementById(
+        "save-status"
+    ).textContent =
+        text;
+
+}
+
+
+/* =========================================================
+   ADMIN / CREATOR MODE
+   ========================================================= */
+
+function toggleAdminMode() {
+
+    if (adminMode) {
+
+        adminMode =
+            false;
+
+        updateEditorPermissions();
+
+        setSaveStatus(
+            "ADMIN MODE DISABLED"
+        );
+
+        return;
+
+    }
+
+
+    const password =
+        prompt(
+            "CREATOR / ADMIN ACCESS\n\nEnter authorization code:"
+        );
+
+
+    if (
+        password ===
+        ADMIN_CODE
+    ) {
+
+        adminMode =
+            true;
+
+
+        const state =
+            document.getElementById(
+                "editor-state"
+            );
+
+
+        state.classList.add(
+            "unlocked"
+        );
+
+
+        state.innerHTML =
+            '<span class="editor-dot"></span> ADMIN MODE';
+
+
+        updateEditorPermissions();
+
+
+        setSaveStatus(
+            "ADMIN MODE ENABLED"
+        );
+
+
+    } else {
+
+        alert(
+            "ACCESS DENIED."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE PERMISSIONS
+   ========================================================= */
+
+function updateEditorPermissions() {
+
+    const editable =
+        canEditCurrentDossier();
+
+
+    document
+        .querySelectorAll(
+            ".field input, .field select, .record-heading, .record-text"
+        )
+        .forEach(
+            element => {
+
+                element.disabled =
+                    !editable;
+
+            }
+        );
+
+
+    const historyEditor =
+        document.getElementById(
+            "history-text"
+        );
+
+
+    if (historyEditor) {
+
+        historyEditor.contentEditable =
+            editable
+                ? "true"
+                : "false";
+
+    }
+
+
+    const toolbar =
+        document.getElementById(
+            "history-toolbar"
+        );
+
+
+    if (toolbar) {
+
+        toolbar
+            .querySelectorAll(
+                "button, select"
+            )
+            .forEach(
+                element => {
+
+                    element.disabled =
+                        !editable;
+
+                }
+            );
+
+    }
+
+
+    const specialityButton =
+        document.querySelector(
+            ".speciality-button"
+        );
+
+
+    if (specialityButton) {
+
+        specialityButton.disabled =
+            !editable;
+
+        specialityButton.style.opacity =
+            editable
+                ? "1"
+                : ".35";
+
+        specialityButton.style.cursor =
+            editable
+                ? "pointer"
+                : "not-allowed";
+
+    }
+
+
+    document
+        .querySelectorAll(
+            ".skin-button"
+        )
+        .forEach(
+            button => {
+
+                button.disabled =
+                    !editable;
+
+                button.style.opacity =
+                    editable
+                        ? "1"
+                        : ".35";
+
+                button.style.cursor =
+                    editable
+                        ? "pointer"
+                        : "not-allowed";
+
+            }
+        );
+
+
+    const newButton =
+        document.querySelector(
+            ".new-dossier-button"
+        );
+
+
+    if (newButton) {
+
+        newButton.disabled =
+            false;
+
+        newButton.style.opacity =
+            "1";
+
+    }
+
+
+    const state =
+        document.getElementById(
+            "editor-state"
+        );
+
+
+    const permissionText =
+        document.getElementById(
+            "permission-text"
+        );
+
+
+    if (adminMode) {
+
+        state.classList.add(
+            "unlocked"
+        );
+
+        state.innerHTML =
+            '<span class="editor-dot"></span> ADMIN MODE';
+
+
+        permissionText.textContent =
+            "CREATOR / ADMIN";
+
+        permissionText.style.color =
+            "rgba(255,255,255,.85)";
+
+
+    } else if (editable) {
+
+        state.classList.add(
+            "unlocked"
+        );
+
+        state.innerHTML =
+            '<span class="editor-dot"></span> YOUR DOSSIER';
+
+
+        permissionText.textContent =
+            "PERSONAL STORAGE";
+
+        permissionText.style.color =
+            "rgba(255,255,255,.75)";
+
+
+    } else {
+
+        state.classList.remove(
+            "unlocked"
+        );
+
+        state.innerHTML =
+            '<span class="editor-dot"></span> READ ONLY';
+
+
+        permissionText.textContent =
+            "READ ONLY";
+
+        permissionText.style.color =
+            "rgba(255,255,255,.42)";
+
+    }
+
+
+    const saveButton =
+        document.querySelector(
+            ".save-button"
+        );
+
+
+    if (saveButton) {
+
+        saveButton.disabled =
+            !editable;
+
+        saveButton.style.opacity =
+            editable
+                ? "1"
+                : ".35";
+
+        saveButton.style.cursor =
+            editable
+                ? "pointer"
+                : "not-allowed";
+
+    }
+
+
+    const deleteButton =
+        document.querySelector(
+            ".delete-button"
+        );
+
+
+    if (deleteButton) {
+
+        deleteButton.disabled =
+            !editable;
+
+        deleteButton.style.opacity =
+            editable
+                ? "1"
+                : ".25";
+
+        deleteButton.style.cursor =
+            editable
+                ? "pointer"
+                : "not-allowed";
+
+    }
+
+
+    const recordButtons =
+        document.querySelectorAll(
+            ".record-add"
+        );
+
+
+    recordButtons.forEach(
+        button => {
+
+            button.style.opacity =
+                editable
+                    ? "1"
+                    : ".35";
+
+        }
+    );
+
+
+    loadSpecialityDisabledState();
+
+}
+
+
+function loadSpecialityDisabledState() {
+
+    const editable =
+        canEditCurrentDossier();
+
+
+    const selected =
+        Array.from(
+            document.querySelectorAll(
+                '.speciality-option input[type="checkbox"]:checked'
+            )
+        );
+
+
+    document
+        .querySelectorAll(
+            '.speciality-option input[type="checkbox"]'
+        )
+        .forEach(
+            checkbox => {
+
+                if (!editable) {
+
+                    checkbox.disabled =
+                        true;
+
+                    checkbox.parentElement.style.opacity =
+                        ".35";
+
+                    return;
+
+                }
+
+
+                if (
+                    selected.length >= 2 &&
+                    !checkbox.checked
+                ) {
+
+                    checkbox.disabled =
+                        true;
+
+                    checkbox.parentElement.style.opacity =
+                        ".25";
+
+                } else {
+
+                    checkbox.disabled =
+                        false;
+
+                    checkbox.parentElement.style.opacity =
+                        "1";
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   FIELD CHANGE DETECTION
+   ========================================================= */
+
+document.addEventListener(
+    "input",
+    function(event) {
+
+        if (
+            event.target.matches(
+                ".field input, .field select, .record-heading, .record-text, #history-text"
+            )
+        ) {
+
+            if (
+                canEditCurrentDossier()
+            ) {
+
+                setSaveStatus(
+                    "UNSAVED CHANGES"
+                );
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SELECT CHANGE
+   ========================================================= */
+
+document.addEventListener(
+    "change",
+    function(event) {
+
+        if (
+            event.target.id ===
+            "status-select"
+        ) {
+
+            if (
+                canEditCurrentDossier()
+            ) {
+
+                updateStatusColor();
+
+                setSaveStatus(
+                    "UNSAVED CHANGES"
+                );
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SKIN ZOOM
+   ========================================================= */
+
+const skinZoomOverlay =
+    document.getElementById(
+        "skin-zoom-overlay"
+    );
+
+const skinZoomImage =
+    document.getElementById(
+        "skin-zoom-image"
+    );
+
+const skinZoomTitle =
+    document.getElementById(
+        "skin-zoom-title"
+    );
+
+const zoomLevel =
+    document.getElementById(
+        "zoom-level"
+    );
+
+
+let currentZoom =
+    1;
+
+let currentZoomSide =
+    "front";
+
+
+function openSkinZoom(side) {
+
+    const dossier =
+        getCurrentDossier();
+
+    if (!dossier)
+        return;
+
+
+    let imageSource =
+        "";
+
+
+    if (
+        side === "back"
+    ) {
+
+        imageSource =
+            dossier.skinBack || "";
+
+    } else {
+
+        imageSource =
+            dossier.skinFront ||
+            dossier.skin ||
+            "";
+
+    }
+
+
+    if (!imageSource) {
+
+        return;
+
+    }
+
+
+    currentZoomSide =
+        side;
+
+    currentZoom =
+        1;
+
+
+    skinZoomImage.src =
+        imageSource;
+
+
+    skinZoomTitle.textContent =
+        side === "back"
+            ? "PERSONNEL SKIN // BACK"
+            : "PERSONNEL SKIN // FRONT";
+
+
+    updateZoomDisplay();
+
+
+    skinZoomOverlay.classList.add(
+        "visible"
+    );
+
+}
+
+
+function closeSkinZoom() {
+
+    skinZoomOverlay.classList.remove(
+        "visible"
+    );
+
+    currentZoom =
+        1;
+
+    skinZoomImage.style.transform =
+        "scale(1)";
+
+}
+
+
+function handleZoomBackgroundClick(event) {
+
+    if (
+        event.target ===
+        skinZoomOverlay
+    ) {
+
+        closeSkinZoom();
+
+    }
+
+}
+
+
+function changeZoom(amount) {
+
+    currentZoom +=
+        amount;
+
+
+    currentZoom =
+        Math.max(
+            0.5,
+            Math.min(
+                3,
+                currentZoom
+            )
+        );
+
+
+    updateZoomDisplay();
+
+}
+
+
+function resetZoom() {
+
+    currentZoom =
+        1;
+
+    updateZoomDisplay();
+
+}
+
+
+function updateZoomDisplay() {
+
+    skinZoomImage.style.transform =
+        "scale(" +
+        currentZoom +
+        ")";
+
+    zoomLevel.textContent =
+        Math.round(
+            currentZoom * 100
+        ) +
+        "%";
+
+}
+
+
+/* =========================================================
+   MOUSE WHEEL ZOOM
+   ========================================================= */
+
+document
+    .getElementById("skin-zoom-view")
+    .addEventListener(
+        "wheel",
+        function(event) {
+
+            event.preventDefault();
+
+            if (
+                event.deltaY < 0
+            ) {
+
+                changeZoom(
+                    0.1
+                );
+
+            } else {
+
+                changeZoom(
+                    -0.1
+                );
+
+            }
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+/* =========================================================
+   INITIALIZATION
+   ========================================================= */
+
+renderDossierList();
+
+loadDossier();
+
+updateStatusColor();
+
+updateEditorPermissions();
+
+startBootSequence();
+
+</script>
+
+
+</body>
+
+</html>
